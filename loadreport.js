@@ -1,34 +1,51 @@
 var fs = require('fs');
 var WebPage = require('webpage');
 
-var loadreport = {
 
+
+var millis=0;
+function exit() {
+  setTimeout(function () {
+    phantom.exit();
+  }, millis);
+}
+
+var loadreport = {
     run: function () {
         var cliConfig = {};
         loadreport.performancecache = this.clone(loadreport.performance);
         if (!this.processArgs(cliConfig, [
-            {
-                name: 'url',
-                def: 'http://google.com',
-                req: true,
-                desc: 'the URL of the site to load test'
-            }, {
-                name: 'task',
-                def: 'performance',
-                req: false,
-                desc: 'the task to perform',
-                oneof: ['performance', 'performancecache', 'filmstrip']
-            }, {
-                name: 'configFile',
-                def: 'config.json',
-                req: false,
-                desc: 'a local configuration file of further loadreport settings'
-            }
+          {
+            name: 'url',
+            def: 'http://google.com',
+            req: true,
+            desc: 'the URL of the site to load test'
+          },
+          {
+            name: 'duration',
+            def: 0,
+            req: false,
+            desc: 'number of milliseconds to keep phantom running. (used to acquire everything console.log-ged after the page is loaded)'
+          },
+          {
+            name: 'task',
+            def: 'performance',
+            req: false,
+            desc: 'the task to perform',
+            oneof: ['performance', 'performancecache', 'filmstrip']
+          },
+          {
+            name: 'configFile',
+            def: 'config.json',
+            req: false,
+            desc: 'a local configuration file of further loadreport settings'
+          }
         ])) {
             //phantom.exit();
             return;
         }
         this.config = this.mergeConfig(cliConfig, cliConfig.configFile);
+        millis =  cliConfig.duration;
         var task = this[this.config.task];
         this.load(this.config, task, this);
     },
@@ -304,14 +321,14 @@ var loadreport = {
                 } else {
                     task.onLoadFinished.call(scope, page, config, status);
                 }
-                phantom.exit();
+                exit();
 
                 page = WebPage.create();
                 doPageLoad();
             };
         } else {
             page.onLoadFinished = function (status) {
-                phantom.exit();
+              exit();
             };
         }
         page.settings.localToRemoteUrlAccessEnabled = true;
