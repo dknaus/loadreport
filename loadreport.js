@@ -334,7 +334,8 @@ var loadreport = {
         page.settings.localToRemoteUrlAccessEnabled = true;
         page.settings.webSecurityEnabled = false;
         page.onConsoleMessage = function (msg) {
-            console.log(msg)
+              var timeDiff = new Date().getTime() - loadreport.performance.start;
+              console.log(msg + ' -' + timeDiff);
             if (msg.indexOf('jserror-') >= 0){
                 loadreport.performance.evalConsoleErrors.push(msg.substring('jserror-'.length,msg.length));
             }else{
